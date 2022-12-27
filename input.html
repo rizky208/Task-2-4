@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="input.js"></script>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <title>menampilkan,menambahkan,menghapus data dari input val</title>
+  </head>
+  <body>
+    <form class="form">
+      <input
+        class="inputfill font20px-med text-grey"
+        name="email"
+        type="email"
+        placeholder="Masukan Email"
+      />
+      <input
+        class="inputfill font20px-med text-grey"
+        name="password"
+        type="password"
+        placeholder="Masukan Password"
+      />
+      <input
+        class="inputfill font20px-med text-grey"
+        name="phone"
+        type="text"
+        placeholder="Masukan Phonenumber"
+      />
+
+      <button class="btn-submit font20px-bld text-black" type="submit">
+        Submit
+      </button>
+    </form>
+
+    <div id="content"></div>
+
+    <script>
+      // Membuat atau menemukan lokasi dom dari form.
+      const inputIsi = document.querySelector(".form"); // form (wraper) -> input dengan (name).
+
+      // setelah ketemu kita attach document dengan submit(btn) yang dimana menambahkan method event.preventdefault
+      // untuk mencegah terjadinya event bawaan dari sebuah DOM.
+      inputIsi.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        // daftarkan variable baru formData untuk membuat sebuah data form kosong dari bagian form
+        // daftarkan variabel data untuk dari form kosong (formData), yang nantinya akan membaca struktur bagian fari hasil fetch
+        const formData = new FormData(inputIsi); // biasanya digunakan pure html, auto detetct dari input name dengan pembungkus form. (url encoded)
+        const data = new URLSearchParams(formData);
+
+        //formData.append => menambahkan inputan lain
+        // formData.getAll
+
+        // method post
+        fetch("https://63a962a3594f75dc1db4202f.mockapi.io/dataUser", {
+          method: "POST",
+          body: data,
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            // alternatif 1 (repaint - reflow) // document.getElementById(
+            //   "content"
+            // ).innerHTML += `<div class="card-output">
+            //         <div class="font20px-reg text-black">${data.email}</div>
+            //         <div class="font20px-reg text-black">${data.password}</div>
+            //         <div class="font20px-reg text-black">${data.phone}</div>
+            //         <button class="btn-delete font20px-bld text-white" onclick='deleteData(${data.id})'>delete</button>
+            //     </div>
+            //     `; // += bakal nge reload semua dom.
+
+            document.getElementById("content").insertAdjacentHTML(
+              "beforeend",
+              `<div id="listOuput-${data.id}" class="card-output"> 
+                     <div class="font20px-reg text-black">${data.email}</div>
+                     <div class="font20px-reg text-black">${data.password}</div>
+                     <div class="font20px-reg text-black">${data.phone}</div>
+                     <button class="btn-delete font20px-bld text-white" onclick='deleteData(${data.id})'>delete</button>
+                 </div>
+                 `
+              // insertadjecsenHTML = tidak melakukan re read data dom, dan mengurangi penghitungan ulang (repaint - reflow), dan lebih baik dari innerHTML
+            );
+          })
+          .catch((error) => console.log(error));
+      });
+
+      // proses pengambilan hasil fetching dengan method apiHelper.
+      fetcher("GET", "dataUser").then((data) => {
+        document.getElementById("content").innerHTML = data // data tersebut akan ditampilkan pada dom "content"
+          .map(
+            (item) =>
+              `<div class="card-output">
+                    <div class="font20px-reg text-black">${item.email}</div>
+                    <div class="font20px-reg text-black">${item.password}</div>
+                    <div class="font20px-reg text-black">${item.phone}</div>
+                    <button class="btn-delete font20px-bld text-white" onclick='deleteData(${item.id})'>delete</button>
+                </div>
+                `
+          )
+          .join("");
+      });
+    </script>
+  </body>
+</html>
